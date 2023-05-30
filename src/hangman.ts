@@ -1,3 +1,4 @@
+import { exit } from "process";
 import readline from "readline";
 
 const line = readline.createInterface({
@@ -16,12 +17,15 @@ const words: string[] = [
     "LAN",
     "CAN",
     "WAN",
-    "Permutation Cipher"
+    "Permutation Cipher",
+    "Substitution Cipher",
+    "Computer Hardening",
+    "Exploit",
+    "Cybersecurity"
 ];
 let word: string = "";
 
 // User
-let guesses: number = 0;
 let incorrectGuesses: number = 0;
 let correct: boolean = false;
 let wLetters: string[] = [];
@@ -45,19 +49,19 @@ function guess() {
             if (!word.toLowerCase().includes(guess.toLowerCase())) {
                 incorrectGuesses++;
                 wLetters.push(guess);
-                if (incorrectGuesses >= 8) {
+                if (incorrectGuesses >= 9) {
                     gameOver();
+                    return;
                 }
             } else {
                 for (let i = 0; i < word.length; i++) {
                     if (word[i].toLowerCase() === guess.toLowerCase()) {
-                        cLetters[i] = guess.toLowerCase();
+                        cLetters[i] = word[i].toLowerCase();
                     }
                 } 
 
                 let fString = "";
                 for (let i = 0; i < cLetters.length; i++) {
-                    if (cLetters[i] === undefined) continue;
                     fString += cLetters[i].toLowerCase();
                 }
 
@@ -66,6 +70,9 @@ function guess() {
         } else {
             if (guess.toLowerCase() === word.toLowerCase()) {
                 correct = true;
+            } else {
+                wLetters.push(guess);
+                incorrectGuesses++;
             }
         }
 
@@ -80,23 +87,40 @@ function guess() {
 function gameOver() {
     console.clear();
     if (correct) {
-        console.log("YOU WON!!!");
+        console.log("YOU WON!");
     } else {
-        console.log("you lost....");
+        console.log("you lost...");
     }
+
+    console.log(`You got ${incorrectGuesses} wrong guesses.`);
+
+    line.question("Press any key to go to the menu...", () => {
+        console.clear();
+        incorrectGuesses = 0;
+        word = "";
+        correct = false;
+        cLetters = [];
+        wLetters = [];
+        menu();
+    });
 }
 
 function game() {
     if (word === "") {
         word = words[Math.round(Math.random() * words.length)];
+        for (let i = 0; i < word.length; i++) {
+            if (word[i] === " ") {
+                cLetters.push(" ");
+            } else {
+                cLetters.push("");
+            }
+        }
     }
 
     console.clear();
     printMan();
     
-    for (let spacing = 0; spacing < 3; spacing++) {
-        console.log("");
-    }
+    console.log("\n");
     // Construct guess string 
     let correctSoFar = "";
     for (let i = 0; i < word.length; i++) {
@@ -113,12 +137,50 @@ function game() {
     console.log(correctSoFar);
     console.log("");
     console.log("Incorrect Letters: " + wLetters.toString().replace(",", ", ").toUpperCase());
-    for (let spacing = 0; spacing < 3; spacing++) {
-        console.log("");
-    }
-
+    console.log("\n");
 
     guess();
 }
 
-game();
+function about() {
+    console.clear();
+    console.log("#===================================================#")
+    console.log("#                                                   #");
+    console.log("#             Developed by Cameron A.               #");
+    console.log("#              Written in TypeScript                #");
+    console.log("#      https://github.com/Camerxxn/HangmanGame      #");
+    console.log("#                                                   #");
+    console.log("#===================================================#")
+    line.question("\nPress any key to go back...", () => {
+        menu();
+    })
+}
+
+function menu() {
+    console.clear();
+
+    console.log("#========================#")
+    console.log("#         Hangman        #")
+    console.log("#========================#")
+    console.log("#    (1) Play Hangman    #");
+    console.log("#        (2) About       #");
+    console.log("#        (3) Quit        #");
+    console.log("#========================#")
+
+    
+    line.question("", (input) => {
+        const inp = Number.parseInt(input);
+        switch (inp) {
+            case 1: 
+                game()
+                break;
+            case 2: 
+                about();
+                break;
+            case 3:
+                exit(0);
+        }
+    });
+}
+
+menu();
